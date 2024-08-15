@@ -4,12 +4,13 @@ from time import sleep
 from utils.proxy_validators import validate_proxy
 from simple_term_menu import TerminalMenu
 from utils.proxy_tester import test_http_https_proxy
+from utils.proxy_url_operations import handle_list_url
+from utils.os_operations import clear_screen
 from utils.proxy_file_operations import (
     read_proxies_from_file,
     save_successful_proxies,
     add_proxies_to_file,
 )
-from utils.os_operations import clear_screen
 
 proxy_meh = """
 ##############################################################
@@ -24,6 +25,62 @@ proxy_meh = """
 ##############################################################
 """
 
+
+def app_import_list_url():
+    print(proxy_meh)
+
+    urlOut = None
+    list = None
+
+    while urlOut == None:
+
+        txtUrl = input("URL(Github, GitLab,..., .txt): ")
+
+        if txtUrl.endswith(".txt"):
+            urlOut = txtUrl
+
+        clear_screen()
+        print(proxy_meh)
+        print("Was not found any .txt file...")
+
+    options = [
+        "⦿ HTTP",
+        "⦿ HTTPS",
+        "⦿ SOCKS4",
+        "⦿ SOCKS5",
+    ]
+    terminal_menu = TerminalMenu(options, title="\nChoose a protocol:")
+
+    menu_entry_index = terminal_menu.show()
+
+    if menu_entry_index == 0:
+        list = handle_list_url("HTTP", urlOut)
+    elif menu_entry_index == 1:
+        list = handle_list_url("HTTPS", urlOut)
+    elif menu_entry_index == 2:
+        list = handle_list_url("SOCKS4", urlOut)
+    elif menu_entry_index == 3:
+        list = handle_list_url("SOCKS5", urlOut)
+
+    options2 = [
+        "⦿ Test proxies from URL",
+        "⦿ exit",
+    ]
+    
+    terminal_menu2 = TerminalMenu(options2, title="\n:")
+    
+    if len(list) > 0:
+        print(f"Got {len(list)} items on list ...") 
+    
+    menu_entry_index = terminal_menu2.show()
+
+    clear_screen()
+    
+    if menu_entry_index == 0:
+        print("In development")    
+    elif menu_entry_index == 1:
+        return 0
+        
 
 def app_add_proxie():
     cond = True
@@ -103,6 +160,7 @@ def main():
         options = [
             "⦿ Test file proxies",
             "⦿ Add new proxies to file",
+            "⦿ Import proxies from URL(.txt file)",
             "⦿ Exit",
         ]
         terminal_menu = TerminalMenu(options, title="\nOptions:")
@@ -116,6 +174,9 @@ def main():
             clear_screen()
             app_add_proxie()
         elif menu_entry_index == 2:
+            clear_screen()
+            app_import_list_url()
+        elif menu_entry_index == 3:
             clear_screen()
             print("Exiting...")
             break
