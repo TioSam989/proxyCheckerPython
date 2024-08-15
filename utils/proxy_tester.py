@@ -1,9 +1,16 @@
 import requests # type: ignore
 
+# from proxy_validators import validate_proxy
+
 def test_http_https_proxy(type, url, port):
     proxy_url = f"{type}://{url}:{port}"
 
     try:
+        
+        # if validate_proxy:
+        #     print("Wrong Format")
+        #     raise Exception("Wrong Format")
+        
         if type.startswith("socks"):
             proxies = {
                 "http": proxy_url,
@@ -25,4 +32,4 @@ def test_http_https_proxy(type, url, port):
                 f"{proxy_url} proxy failed with status code {res.status_code}.",
             )
     except Exception as err:
-        return False, f"{proxy_url} Timeout"
+        return False, f"{err}"
