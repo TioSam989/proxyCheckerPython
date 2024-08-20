@@ -22,7 +22,7 @@ def test_http_https_proxy(type, url, port):
                 type.replace("http", "https"): proxy_url,
             }
 
-        res = requests.get("https://example.com", proxies=proxies, timeout=10)
+        res = requests.get("https://example.com", proxies=proxies, timeout=5)
 
         if res.status_code == 200:
             return True, f"{proxy_url} proxy is working."

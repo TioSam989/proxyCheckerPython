@@ -4,13 +4,11 @@ def read_proxies_from_file(file_path, validate_proxy_func):
         for line in file:
             line = line.strip()
             if not line or line.startswith("#"):
-                continue 
-            if validate_proxy_func(
-                line
-            ): 
+                continue
+            if validate_proxy_func(line):
                 protocol, rest = line.split("://")
                 url, port = rest.split(":")
-                proxies.append((protocol, url, port))  
+                proxies.append((protocol, url, port))
     return proxies
 
 
@@ -23,6 +21,17 @@ def save_successful_proxies(proxies, file_path):
     except Exception as e:
         print(f"Failed to save successful proxies: {e}")
 
+
+def add_list_proxies_to_file(proxies_list, file_path, format_fn):
+    try:
+        with open(file_path, "a") as file_object:
+            for proxy_string in proxies_list:
+                proxy_pkg = format_fn(proxy_string)
+                proxy_type, url, port = proxy_pkg
+                file_object.write(f"{proxy_type}://{url}:{port}\n")
+        print("Added successfully!")
+    except Exception as err:
+        print(f"Failed to add proxies: {err}")
 
 def add_proxies_to_file(new_proxy, file_path):
     try:

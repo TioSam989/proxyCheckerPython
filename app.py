@@ -1,12 +1,17 @@
 import pyperclip
-import os
-from time import sleep
-from utils.proxy_validators import validate_proxy
 from simple_term_menu import TerminalMenu
+from time import sleep
+from utils.proxy_validators import (
+    validate_proxy,
+    format_proxy_to_object,
+    filter_active_proxies,
+)
+from tqdm import tqdm
 from utils.proxy_tester import test_http_https_proxy
 from utils.proxy_url_operations import handle_list_url
 from utils.os_operations import clear_screen
 from utils.proxy_file_operations import (
+    add_list_proxies_to_file,
     read_proxies_from_file,
     save_successful_proxies,
     add_proxies_to_file,
@@ -41,7 +46,6 @@ def app_import_list_url():
 
         clear_screen()
         print(proxy_meh)
-        print("Was not found any .txt file...")
 
     options = [
         "⦿ HTTP",
@@ -64,23 +68,53 @@ def app_import_list_url():
 
     options2 = [
         "⦿ Test proxies from URL",
+        "⦿ Import all Proxy list( without any test )",
         "⦿ exit",
     ]
-    
-    terminal_menu2 = TerminalMenu(options2, title="\n:")
-    
-    if len(list) > 0:
-        print(f"Got {len(list)} items on list ...") 
-    
-    menu_entry_index = terminal_menu2.show()
 
+    terminal_menu2 = TerminalMenu(options2, title="\nChoose a option:")
+
+    if len(list) > 0:
+        print(f"Got {len(list)} items on list ...")
+    menu_entry_index = terminal_menu2.show()
     clear_screen()
-    
-    if menu_entry_index == 0:
-        print("In development")    
-    elif menu_entry_index == 1:
+    if menu_entry_index == 0:  # test
+        print("Running... (This operation can take a few minutes.)")
+        try:
+            active_proxies = filter_active_proxies(
+                list, test_http_https_proxy, format_proxy_to_object, tqdm
+            )
+            sleep(1)
+            clear_screen()
+            print(f"Found {len(active_proxies)} active proxies.")
+
+            options3 = [
+                "⦿ Save Success proxies",
+                "⦿ Copy success proxies",
+                "⦿ Exit",
+            ]
+
+            terminal_menu = TerminalMenu(options3, title="\nChoose a option:")
+
+            menu_entry_index = terminal_menu.show()
+
+            if menu_entry_index == 0:
+                add_list_proxies_to_file(
+                    active_proxies, "./proxies.txt", format_proxy_to_object
+                )
+            elif menu_entry_index == 1:
+                pyperclip.copy(str(active_proxies))
+            elif menu_entry_index == 2:
+                return 0
+
+        except KeyboardInterrupt:
+            print("\nO programa foi interrompido pelo usuário.")
+    elif menu_entry_index == 1:  # import all
+        add_list_proxies_to_file(list, "./proxies.txt", format_proxy_to_object)
         return 0
-        
+    elif menu_entry_index == 2:  # exit
+        return 0
+
 
 def app_add_proxie():
     cond = True
@@ -130,7 +164,7 @@ def app_test_proxies():
 
         options = [
             "⦿ Save Success List",
-            "⦿ Copy Success List (in development)",
+            "⦿ Copy Success List",
             "⦿ Exit",
         ]
         terminal_menu = TerminalMenu(options, title="\nOptions:", menu_cursor="> ")
