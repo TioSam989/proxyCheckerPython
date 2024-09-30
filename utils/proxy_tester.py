@@ -1,35 +1,18 @@
-import requests # type: ignore
+from time import sleep
+from proxy_checker import ProxyChecker
 
-# from proxy_validators import validate_proxy
 
-def test_http_https_proxy(type, url, port):
-    proxy_url = f"{type}://{url}:{port}"
+def test_http_https_proxy(proxy_type, url, port):
+    
+    proxy_url = f"{proxy_type}://{url}:{port}"
+    checker = ProxyChecker()
 
     try:
-        
-        # if validate_proxy:
-        #     print("Wrong Format")
-        #     raise Exception("Wrong Format")
-        
-        if type.startswith("socks"):
-            proxies = {
-                "http": proxy_url,
-                "https": proxy_url,
-            }
-        else:
-            proxies = {
-                type: proxy_url,
-                type.replace("http", "https"): proxy_url,
-            }
+        result = checker.check_proxy(proxy_url)
 
-        res = requests.get("https://example.com", proxies=proxies, timeout=5)
-
-        if res.status_code == 200:
-            return True, f"{proxy_url} proxy is working."
+        if result is not None:
+            return True, f"{proxy_url} is working.", result
         else:
-            return (
-                False,
-                f"{proxy_url} proxy failed with status code {res.status_code}.",
-            )
+            return False, f"{proxy_url} failed with result: {result}.", None
     except Exception as err:
-        return False, f"{err}"
+        return False, f"Error testing {proxy_url}: {err}", None

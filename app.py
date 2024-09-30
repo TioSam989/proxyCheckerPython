@@ -37,13 +37,10 @@ def app_import_list_url():
     urlOut = None
     list = None
 
-    while urlOut == None:
-
-        txtUrl = input("URL(Github, GitLab,..., .txt): ")
-
+    while urlOut is None:
+        txtUrl = input("URL (raw.githubusercontent/.../*.txt only): ")
         if txtUrl.endswith(".txt"):
             urlOut = txtUrl
-
         clear_screen()
         print(proxy_meh)
 
@@ -54,31 +51,24 @@ def app_import_list_url():
         "⦿ SOCKS5",
     ]
     terminal_menu = TerminalMenu(options, title="\nChoose a protocol:")
-
     menu_entry_index = terminal_menu.show()
 
-    if menu_entry_index == 0:
-        list = handle_list_url("HTTP", urlOut)
-    elif menu_entry_index == 1:
-        list = handle_list_url("HTTPS", urlOut)
-    elif menu_entry_index == 2:
-        list = handle_list_url("SOCKS4", urlOut)
-    elif menu_entry_index == 3:
-        list = handle_list_url("SOCKS5", urlOut)
+    protocol = ["HTTP", "HTTPS", "SOCKS4", "SOCKS5"][menu_entry_index]
+    list = handle_list_url(protocol, urlOut)
 
     options2 = [
         "⦿ Test proxies from URL",
-        "⦿ Import all Proxy list( without any test )",
-        "⦿ exit",
+        "⦿ Import all Proxy list (without any test)",
+        "⦿ Exit",
     ]
 
-    terminal_menu2 = TerminalMenu(options2, title="\nChoose a option:")
-
+    terminal_menu2 = TerminalMenu(options2, title="\nChoose an option:")
     if len(list) > 0:
-        print(f"Got {len(list)} items on list ...")
+        print(f"Got {len(list)} items on list...")
     menu_entry_index = terminal_menu2.show()
     clear_screen()
-    if menu_entry_index == 0:  # test
+
+    if menu_entry_index == 0:
         print("Running... (This operation can take a few minutes.)")
         try:
             active_proxies = filter_active_proxies(
@@ -93,9 +83,7 @@ def app_import_list_url():
                 "⦿ Copy success proxies",
                 "⦿ Exit",
             ]
-
-            terminal_menu = TerminalMenu(options3, title="\nChoose a option:")
-
+            terminal_menu = TerminalMenu(options3, title="\nChoose an option:")
             menu_entry_index = terminal_menu.show()
 
             if menu_entry_index == 0:
@@ -108,29 +96,28 @@ def app_import_list_url():
                 return 0
 
         except KeyboardInterrupt:
-            print("\nO programa foi interrompido pelo usuário.")
-    elif menu_entry_index == 1:  # import all
+            print("\nProgram interrupted by user.")
+    elif menu_entry_index == 1: 
         add_list_proxies_to_file(list, "./proxies.txt", format_proxy_to_object)
         return 0
-    elif menu_entry_index == 2:  # exit
+    elif menu_entry_index == 2:
         return 0
 
 
 def app_add_proxie():
     cond = True
     while cond:
-
         clear_screen()
         print(proxy_meh)
-        newProxie = input("Enter Proxie: ")
-        add_proxies_to_file(newProxie, "./proxies.txt")
+        new_proxie = input("Enter Proxy (format: protocol://ip:port): ")
+        add_proxies_to_file(new_proxie, "./proxies.txt")
         sleep(1)
+
         options = [
             "⦿ Add another one",
             "⦿ Exit",
         ]
         terminal_menu = TerminalMenu(options, title="\nOptions:", menu_cursor="> ")
-
         menu_entry_index = terminal_menu.show()
 
         if menu_entry_index == 0:
@@ -142,19 +129,22 @@ def app_add_proxie():
 
 def app_test_proxies():
     print(proxy_meh)
-
     print("Running...")
+
     proxy_list = read_proxies_from_file("./proxies.txt", validate_proxy)
     successful_proxies = []
 
+    print(f"Testing {len(proxy_list)} proxies...")
+
     for proxy_type, url, port in proxy_list:
         try:
-            success, message = test_http_https_proxy(proxy_type, url, port)
+            success, message, result = test_http_https_proxy(proxy_type, url, port)
             if success:
                 successful_proxies.append((proxy_type, url, port))
             print(message)
         except Exception as e:
-            print(f"Error testing proxy {proxy_type}://{url}:{port}: {e}")
+            print(f"Error testing proxy {url}:{port}: {e}")
+
     print("Finished...")
     sleep(1)
 
@@ -168,20 +158,16 @@ def app_test_proxies():
             "⦿ Exit",
         ]
         terminal_menu = TerminalMenu(options, title="\nOptions:", menu_cursor="> ")
-
         menu_entry_index = terminal_menu.show()
 
         if menu_entry_index == 0:
-            save_successful_proxies(successful_proxies, "../success_proxies.txt")
+            save_successful_proxies(successful_proxies, "./success_proxies.txt")
             sleep(1)
         elif menu_entry_index == 1:
             pyperclip.copy(str(successful_proxies))
             print("Copied successfully!")
             sleep(1)
         elif menu_entry_index == 2:
-            print("Skipped.")
-            break
-        elif menu_entry_index == 3:
             print("Exiting...")
             break
 
@@ -194,11 +180,10 @@ def main():
         options = [
             "⦿ Test file proxies",
             "⦿ Add new proxies to file",
-            "⦿ Import proxies from URL(.txt file)",
+            "⦿ Import proxies from URL (.txt file)",
             "⦿ Exit",
         ]
         terminal_menu = TerminalMenu(options, title="\nOptions:")
-
         menu_entry_index = terminal_menu.show()
 
         if menu_entry_index == 0:
