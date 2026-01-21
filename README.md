@@ -25,7 +25,7 @@ Proxy Manager is a Python-based tool for managing and testing HTTP, HTTPS, SOCKS
 ## Installation
 1. Clone this repository:
    ```bash
-   git clone https://github.com/yourusername/proxy-manager.git
+   git clone https://github.com/TioSam989/proxy-manager.git
    cd proxy-manager
 2. Install the required Python packages:
     ```bash
